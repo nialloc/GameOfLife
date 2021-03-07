@@ -1,19 +1,22 @@
-let w;
-let columns;
-let rows;
-let board;
-let info
+let w
+let columns
+let rows
+let board
 let button
 let timer = 3
 let count_down = 15
 let state = 'stopped'
 
+let gdata
+let status = ''
+
 
 // using ngrok for testing purposes
 let server_name = 'https://6298d0206225.ngrok.io'
+//server_name = 'https://us-central1-crypto-174821.cloudfunctions.net/gameoflife'
 
 function setup() {
-  createCanvas(640, 640);
+  createCanvas(800, 640);
   w = 12; // width of cells in pixels
   columns = 32
   rows = 32
@@ -95,10 +98,7 @@ function setup() {
 
   })
 
-  info = createElement('h2', '?');
-  info.position(400, 220);
-  info.html('-');
-
+  
   setInterval(timeIt, 1 * 1000);
 
   loadJSON(server_name + '/data', cbData, 'json')
@@ -119,7 +119,7 @@ function send_cells() {
     }
   }
 
-  httpPost(server_name + '/cmd/setcells',
+  httpPost(server_name + '/setcells',
     "json", {
       'cells': cells
     })
@@ -160,7 +160,7 @@ function timeIt() {
   }
 
   if (state == 'running') {
-    loadJSON(server_name + '/cmd/step', cbStep, 'json');
+    loadJSON(server_name + '/step', cbStep, 'json');
     loadJSON(server_name + '/data', cbData, 'json');
 
   }
@@ -190,6 +190,24 @@ function draw() {
   
   button_state.html(`state: ${state} ${timer}`)  
 
+  
+  fill(color(0, 0, 255));
+  textSize(16)
+  let posx = 400
+  let posy = 220
+  if (gdata) {
+    text(`Network: ${gdata.network}`,posx,posy)
+  
+s = `Sender Address: ${gdata.caller_address}
+Balance ${gdata.caller_balance} eth
+Latest Block ${gdata.block}
+Last Transaction Block ${gdata.myblock}`
+    text(s,posx,posy+20)
+   
+  }
+ 
+  text(`status: ${status}`,10,400)
+
 }
 
 // allow user to select their own cells..
@@ -209,6 +227,8 @@ function mousePressed(event) {
 
 function cbData(data) {
   
+  console.log(data)
+  
   if (data.cells) {
     let cells = data.cells
 
@@ -220,10 +240,13 @@ function cbData(data) {
       }
     }
   }
-  info.html(`<p>Network: ${data.network}</p>
-    <p>Sender Address: ${data.caller_address}</p>
-    <p>Balance ${data.caller_balance} eth</p>
-    `)
 
+
+  gdata = data
   button_data.html('...')
+  
+  if (data.code) {
+    status = data.code
+  }
+  
 }
