@@ -13,11 +13,11 @@ The app is the same, but it just points to the 'Kovan' test network instead of t
 You can see it in action [here](https://nialloc.github.io/GameOfLife/) 
 
 The application consists of three parts:
-* Front end Javascript application using the P5JS library hich runs in your browser
+* Front end Javascript application using the [p5js](https://p5js.org/) library which runs in your browser
 * A Python Flask app implemented as a google cloud function
 * An Ethereum smart contract written in Solidity which runs on the (Kovan) Ethereum blockchain
 
-### P5js - client application
+### p5js - client application
 There are just three files in the app: a very simple `index.html` to host the javascript application in [sketch.js](https://nialloc.github.io/GameOfLife/sketch.js) along with a simple `style.css` stylesheet. When started, the app requests the 32x32 grid from the blockchain (via the flask app). Nothing will happen until you press the ```start``` button. Once this is pressed the app will request a new step on a timed basis (about one per minute). This will continue until the _stop_ button is pressed. There are a couple of other buttons that will create a random selection on the screen, clear the screen, and add a few [gliders](https://en.wikipedia.org/wiki/Glider_(Conway%27s_Life)). You can also use the mouse to select/deselect individual cells.
 
 ### Python Flask google cloud function
