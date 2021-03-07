@@ -12,8 +12,9 @@ let status = ''
 
 
 // using ngrok for testing purposes
-let server_name = 'https://6298d0206225.ngrok.io'
-//server_name = 'https://us-central1-crypto-174821.cloudfunctions.net/gameoflife'
+// let server_name = 'https://6298d0206225.ngrok.io'
+// use google cloud function implementation
+let server_name = 'https://us-central1-crypto-174821.cloudfunctions.net/gameoflife'
 
 function setup() {
   createCanvas(800, 640);
