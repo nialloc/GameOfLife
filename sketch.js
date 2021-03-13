@@ -4,17 +4,13 @@ let rows
 let board
 let button
 let timer = 3
-let count_down = 15
-let state = 'stopped'
+
 
 let gdata
-let status = ''
-
 
 // using ngrok for testing purposes
-// let server_name = 'https://6298d0206225.ngrok.io'
-// use google cloud function implementation
-let server_name = 'https://us-central1-crypto-174821.cloudfunctions.net/gameoflife'
+//let server_name = 'https://76a64b6ad96e.ngrok.io'
+server_name = 'https://us-central1-crypto-174821.cloudfunctions.net/gameoflife'
 
 function setup() {
   createCanvas(800, 640);
@@ -32,19 +28,13 @@ function setup() {
     }
   }
 
-  button_start = createButton('start');
+  button_start = createButton('start new pattern');
   button_start.position(400, 0);
   button_start.mousePressed(function() {
-
-    state = 'running'
     // send cell pattern to server
     send_cells()
   });
-  button_stop = createButton('stop');
-  button_stop.position(450, 0);
-  button_stop.mousePressed(function() {
-    state = 'stopped'
-  });
+
 
   button_getdata = createButton('get data')
   button_getdata.position(400,30)
@@ -52,17 +42,6 @@ function setup() {
     request_data()
   })
 
-  button_state = createButton('state');
-  button_state.position(400, 90);
-  button_state.mousePressed(function() {
-    
-  });
-  button_data = createButton('...');
-  button_data.position(530, 90);
-  button_data.mousePressed(function() {
-    
-  });
-  
   
 
   button_random = createButton('Random');
@@ -84,9 +63,9 @@ function setup() {
     clear_board()
   })
 
-  button_sliders = createButton('Sliders')
-  button_sliders.position(400, 180)
-  button_sliders.mousePressed(function() {
+  button_gliders = createButton('Gliders')
+  button_gliders.position(400, 180)
+  button_gliders.mousePressed(function() {
 
     clear_board()
     for (let i = 5; i < 20; i += 4) {
@@ -100,16 +79,22 @@ function setup() {
   })
 
   
-  setInterval(timeIt, 1 * 1000);
+  setInterval(timerGetData, 30 * 1000);
+  setInterval(timerStep, 60 * 1000);
 
   loadJSON(server_name + '/data', cbData, 'json')
-  button_data.html(`waiting for data`)
+  
+}
 
+function timerGetData() {
+  loadJSON(server_name + '/data', cbData, 'json');
+}
+function timerStep() {
+  loadJSON(server_name + '/step', cbStep, 'json');
 }
 
 function request_data(){
   loadJSON(server_name + '/data', cbData, 'json')
-  button_data.html('waiting for data..')
 }
 
 function send_cells() {
@@ -123,9 +108,8 @@ function send_cells() {
   httpPost(server_name + '/setcells',
     "json", {
       'cells': cells
-    })
+    },cbData)
 
-  button_data.html(`waiting for data`)
 }
 
 
@@ -137,37 +121,11 @@ function clear_board() {
   }
 }
 
-function timeIt() {
-
-  timer--
-
-  //button_countdown.html(`collecting data in ${timer}`)
-  if (timer > 0) {
-    return
-  }
-  // slow down over time
-  timer = count_down
-  if (count_down == 15) {
-    count_down = 30
-  } else if (count_down == 30) {
-    count_down = 60
-  }
 
 
-
-  if (state == 'stopped') {
-    loadJSON(server_name + '/data', cbData, 'json');
-    return
-  }
-
-  if (state == 'running') {
-    loadJSON(server_name + '/step', cbStep, 'json');
-    loadJSON(server_name + '/data', cbData, 'json');
-
-  }
-}
 function cbStep(data){
   console.log('cbStep',data)
+  loadJSON(server_name + '/data', cbData, 'json');
 }
     
 function cbSetCellsError(response) {
@@ -189,8 +147,6 @@ function draw() {
     }
   }
   
-  button_state.html(`state: ${state} ${timer}`)  
-
   
   fill(color(0, 0, 255));
   textSize(16)
@@ -202,7 +158,8 @@ function draw() {
 s = `Sender Address: ${gdata.caller_address}
 Balance ${gdata.caller_balance} eth
 Latest Block ${gdata.block}
-Last Transaction Block ${gdata.myblock}`
+Last Transaction Block ${gdata.myblock}
+Next Step won't be until at least Block ${gdata.target}`
     text(s,posx,posy+20)
    
   }
@@ -242,12 +199,11 @@ function cbData(data) {
     }
   }
 
-
+  // store this is a global variable
   gdata = data
-  button_data.html('...')
   
-  if (data.code) {
-    status = data.code
+  if (data.status) {
+    status = data.status
   }
   
 }
