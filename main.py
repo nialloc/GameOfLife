@@ -1,11 +1,8 @@
 import json
 from flask import Flask, jsonify, request
-#from flask_cors import CORS
 from web3 import Web3, HTTPProvider
 from web3.eth import Account
-
 import os
-
 
 # not sure if dotenv will work in google cloud (can't pip install it)
 try :
@@ -15,14 +12,14 @@ except:
     pass
 
 app = Flask(__name__)
-#CORS(app) 
 
 print('starting..')
 web3 = Web3(HTTPProvider(os.getenv('HTTPProvider')))
 
 # do this a a test of connectivity
-
 print('block', web3.eth.blockNumber)
+
+GAP = int(60/4) # Kovan updates every 4 seconds, let's wait for a minute (60)
 
 compiler_contract_path = '../build/contracts/GameOfLife.json'
 compiler_contract_path = 'GameOfLife.json'
@@ -125,7 +122,7 @@ def do_command(cmd):
             cells = json.loads(data)
             print("cells",cells)
         except Exception as e:
-            return jsonify({'code':str(e)})
+            return jsonify({'status':str(e)})
 
         # convert array into 4 x 256 bit elements
         try:
@@ -133,6 +130,7 @@ def do_command(cmd):
             print("cell4",cell4)
         except Exception as e:
             return jsonify({'code':str(e)})
+
 
         txn = contract.functions.setCells(cell4[0],cell4[1],cell4[2],cell4[3]).buildTransaction(
             {
@@ -143,7 +141,19 @@ def do_command(cmd):
         )
     else :
         print("starting step..")
+
+        # check when the last step was done
+        # compare to current block
+        # only execute the step if the time is greater than one minute
+        myblock = contract.functions.getMyBlock().call()
+        current = web3.eth.blockNumber
+
+        target  = myblock + GAP
+        print(f"current {current} target {target}")
         
+        if current < target :
+            return jsonify({'code':f'current block is {current}, skipping until block {target}'})    
+
         txn = contract.functions.step().buildTransaction(
             {
                 'chainId' : chainId,
@@ -162,10 +172,11 @@ def do_command(cmd):
     try: 
         result = web3.eth.sendRawTransaction(signed_txn.rawTransaction)
         print('result',result)
+        txn['status'] = 'ok'
     except Exception as e:
         print(type(e))
         print(e)
-        txn = {'result':str(e)}
+        txn = {'status':str(e)}
 
     response = txn
 
@@ -251,15 +262,18 @@ def get_data():
     caller_balance = str(web3.fromWei(caller_balance,'ether'))
     
     block = web3.eth.blockNumber
+    myblock = contract.functions.getMyBlock().call()
 
     response = {
+        'status'          : 'ok',
         'network'         : network_name,
         'block'           : block,
-        'myblock'         : contract.functions.getMyBlock().call(),
+        'myblock'         : myblock,
         'caller_address'  : caller_address,
         'caller_balance'  :  caller_balance,
         'contract_address': deployed_contract_address,
         'contract_balance' : web3.eth.get_balance(deployed_contract_address),
+        'target'            : myblock + GAP,
         'rows' : rows,
         'cols' : cols,
         'cells' : cells
