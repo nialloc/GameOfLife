@@ -1,5 +1,5 @@
-# GameOfLife
-The most expensive implementation of [Conway's Game of Life](https://en.wikipedia.org/wiki/Conway%27s_Game_of_Life) ever - over $2,000 per step! (Probably the slowest too!)
+# Ethereum based Conway's Game Of Life
+The world's most expensive implementation of [Conway's Game of Life](https://en.wikipedia.org/wiki/Conway%27s_Game_of_Life) ever - over $2,000 per step! (Probably the slowest too!)
 
 Conway's Game of Life running as a smart contract on the Ethereum Blockchain. 
 
@@ -18,7 +18,7 @@ The application consists of three parts:
 * An Ethereum smart contract written in Solidity which runs on the (Kovan) Ethereum blockchain
 
 ### p5js - client application
-There are just three files in the app: a very simple `index.html` to host the javascript application in [sketch.js](https://nialloc.github.io/GameOfLife/sketch.js) along with a simple `style.css` stylesheet. When started, the app requests the 32x32 grid from the blockchain (via the flask app). Nothing will happen until you press the ```start``` button. Once this is pressed the app will request a new step on a timed basis (about one per minute). This will continue until the _stop_ button is pressed. There are a couple of other buttons that will create a random selection on the screen, clear the screen, and add a few [gliders](https://en.wikipedia.org/wiki/Glider_(Conway%27s_Life)). You can also use the mouse to select/deselect individual cells.
+There are just three files in the app: a very simple `index.html` to host the javascript application in [sketch.js](https://nialloc.github.io/GameOfLife/sketch.js) along with a simple `style.css` stylesheet. When started, the app requests the 32x32 grid from the blockchain (via the flask app). Every minute or so the app will trigger a 'step' in the smart contract. There are a couple of other buttons that will create a random selection on the screen, clear the screen, and add a few [gliders](https://en.wikipedia.org/wiki/Glider_(Conway%27s_Life)). You can also use the mouse to select/deselect individual cells. Press the `start new pattern` button to send your pattern to the smart contract.
 
 ### Python Flask google cloud function
 This started as a bog standard [Flask](https://flask.palletsprojects.com/en/1.1.x/) application, but I converted it into a google cloud function to avoid the hassle of having to host it somewhere.
