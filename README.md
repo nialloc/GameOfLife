@@ -3,7 +3,7 @@ The world's most expensive implementation of [Conway's Game of Life](https://en.
 
 Conway's Game of Life running as a smart contract on the Ethereum Blockchain. 
 
-<img width="781" src="https://nialloc.github.io/GameOfLife/screenshot.png">
+<img width="781" src="https://nialloc.github.io/GameOfLife/animated-screenshot.gif">
 
 This application would be able to run 'forever' - so long as there was some funds in an Ethereum account that could be used to run each 'step'.
 
